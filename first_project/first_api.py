@@ -45,7 +45,7 @@ app = FastAPI()
 customers = {
   1: Customer(
     name="Oscar",
-    age= 26,
+    age= 27,
     income=30000
   )
 }
@@ -79,6 +79,7 @@ def get_customers():
 def get_customer(customer_id: int):
     logger.info(f'Data of customer {customer_id} requested.')
     if customer_id not in customers:
+        logger.info(f'Customer {customer_id} not found.')
         raise HTTPException(status_code=404, detail='Customer not found')
     else:
         return customers.get(customer_id)
@@ -87,28 +88,34 @@ def get_customer(customer_id: int):
 def create_customer(customer_id: int, customer: Customer):
     logger.info(f'Creation of customer {customer_id} requested.')
     if customer_id in customers:
+        logger.info(f'Customer {customer_id} already exists.')
         raise HTTPException(status_code=400, detail= 'Customer already exists')
     else:
         customers[customer_id] = customer
         risk = calculate_risk(customer.income)
+        logger.info(f'Customer {customer_id} created successfully.')
         return CustomerRisk(**customer.model_dump(), risk_level=risk)
         
 @app.put('/customers/{customer_id}')
 def update_customer(customer_id: int, customer: Customer):
     logger.info(f'Update of customer {customer_id} requested.')
     if customer_id not in customers:
+        logger.info(f'Customer {customer_id} not found.')
         raise HTTPException(status_code=404, detail='Customer not found')
     else:
         customers[customer_id]= customer
+        logger.info(f'Customer {customer_id} updated successfully.')
         return customers.get(customer_id)
     
 @app.delete('/customers/{customer_id}')
 def delete_customer(customer_id: int):
     logger.info(f'Deletion of customer {customer_id} requested.')
     if customer_id not in customers:
+        logger.info(f'Customer {customer_id} not found.')
         raise HTTPException(status_code=404, detail='Customer not found')
     else:
         del customers[customer_id]
+        logger.info(f'Customer {customer_id} deleted successfully.')
         return {"message": "Customer deleted successfully"}
     
 @app.get('/customers-by-income')
@@ -120,31 +127,46 @@ def get_customers_by_income(min_income: int):
         if customer.income >= min_income
         }
     if not filtered_customers:
+        logger.info('No customers found.')
         raise HTTPException(status_code=404, detail='No customers found')
+    logger.info(f'Returning customers with income >= {min_income}.')
     return filtered_customers
 
 @app.post('/predict', response_model=PredictionResponse)
 def predict(input_data: ModelInput):
+    # Para hacer pruebas con Swagger, usar las features
+    # [1,6,4,12,5,5,3,4,1,67,3,2,2,1,2,1,1,1,1,1,1,1,1,1]
     logger.info('Prediction request received.')
-    columns = [f'feature_{i}' for i in range(1,25)]
-    data = pd.DataFrame(
-        [input_data.features],
-        columns=columns
-    )
 
-    prediction = int(model.predict(data)[0])
-    probability = float(model.predict_proba(data)[0][1])
+    try:
+        columns = [f'feature_{i}' for i in range(1,25)]
+        data = pd.DataFrame(
+            [input_data.features],
+            columns=columns
+        )
 
-    risk = get_risk(probability)
+        prediction = int(model.predict(data)[0])
+        probability = float(model.predict_proba(data)[0][1])
 
-    logger.info(
-        f'Prediction = {prediction}, '
-        f'Probability = {probability:.4f}, '
-        f'Risk Level = {risk}'
-    )
+        risk = get_risk(probability)
 
-    return PredictionResponse(
-        prediction=prediction,
-        probability=probability,
-        risk_level=risk
-    )
+        logger.info('Prediction generated successfully.')
+        logger.info(
+            f'Prediction = {prediction}, '
+            f'Probability = {probability:.4f}, '
+            f'Risk Level = {risk}'
+        )
+
+        return PredictionResponse(
+            prediction=prediction,
+            probability=probability,
+            risk_level=risk
+        )
+
+    except Exception:
+        logger.exception('Prediction failed.')
+
+        raise HTTPException(
+            status_code=500,
+            detail='An unexpected error occurred while generating the prediction'
+        )

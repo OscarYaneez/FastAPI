@@ -1,0 +1,7 @@
+# Python
+___pycache__/
+*.py[cod]
+
+# Testing
+.coverage
+.pytest_cache/

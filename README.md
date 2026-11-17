@@ -1,10 +1,10 @@
 Credit Risk Prediction API
 
-A complete Machine Learning and REST API project built with Python, Scikit-learn and FastAPI.
+A complete Machine Learning and REST API project built with Python, Scikit-learn and FastAPI and Docker.
 
-The project covers the full workflow of a Machine Learning application: from data exploration and preprocessing to model training, evaluation and persistence, followed by the development of a REST API capable of serving predictions and managing customer data.
+This project covers the end-to-end development of a credit risk prediction application, from data preprocessing and model training to API development, automated testing and containerization.
 
-The API is tested with pytest, includes logging and exception handling, and is designed to be containerized with Docker as the next stage of the project.
+The trained Machine Learning model is exposed through a REST API that supports credit risk predictions and customer management operations.
 
 ------------------------------------------------------
 
@@ -12,9 +12,9 @@ Project Overview
 
 The main objective of this project is to build a simple but complete credit risk prediction system based on the German Credit dataset.
 
-The project is divided into two main components:
+The project is divided into three main components:
 
-Machine Learning pipeline
+1. Machine Learning pipeline
 -  Exploratory Data Analysis (EDA)
 -  Data preprocessing
 -  Train/test split
@@ -23,7 +23,7 @@ Machine Learning pipeline
 -  Model evaluation
 -  Model persistence using Joblib
 
-FastAPI application
+2. FastAPI application
 -  Customer management endpoints
 -  Machine Learning prediction endpoint
 -  Pydantic data validation
@@ -34,7 +34,12 @@ FastAPI application
 -  Test fixtures
 -  Code coverage analysis
 
-The final goal is to expose the trained Machine Learning model through a production-oriented REST API.
+3. Docker Containerization
+- Production-ready Docker image
+- Non-root user execution
+- Separate Docker image for automated testing
+- Docker Compose configuration
+- Production and testing environments
 
 ------------------------------------------------------
 
@@ -64,7 +69,7 @@ Main endpoints (Method, Endpoint, Description)
 -  GET	/customers-by-income	Retrieve customers above a given income
 -  POST	/predict	Predict the credit risk of a customer using the trained model
 
-Once the application is running, the API can be explored through:
+Once the application is running, the API documentation can be explored through:
 
 http://localhost:8000/docs
 
@@ -100,43 +105,51 @@ The API is tested using pytest and FastAPI's TestClient. The test suite currentl
 
 Fixtures are used to provide a controlled state for the API during testing and prevent individual tests from interfering with each other.
 
-Tests can be executed with:
-
-python -m pytest -v
-
-Example output:
-
-14 passed
+Tests can be executed locally or inside a dedicated Docker container.
 
 ------------------------------------------------------
-Technologies
+Docker
 
-The project currently uses:
+The application includes separate Docker configurations for production and testing.
 
-Machine Learning
--  Python
--  NumPy
--  Pandas
--  Scikit-learn
--  Joblib
 
-API
--  FastAPI
--  Pydantic
--  Uvicorn
+Production environment
 
-Testing
--  Pytest
--  FastAPI TestClient
--  HTTPX
--  Coverage.py
+The production image:
+- Uses Python 3.12 Slim as its base image.
+- Installs only production dependencies.
+- Runs the application as a non-root user (appuser).
+- Includes only the files required to serve predictions.
 
-Development
--  Git
--  GitHub
+Build and start the application using Docker Compose:
+
+docker compose up -d --build
+
+The API will be available at:
+
+http://localhost:8000
+
+Interactive documentation:
+
+http://localhost:8000/docs
+
+
+Testing environment
+
+A separate Docker image is provided for running the automated test suite.
+
+Execute the tests using:
+
+docker compose --profile test run --build --rm test
+
+This command builds the testing image, runs the test suite and removes the temporary test container afterwards.
+
+The current test suite contains 14 tests.
 
 ------------------------------------------------------
 Running the Project Locally
+
+Docker is the recommended way to run the application, but it can also be executed directly in a Python environment.
 
 1. Clone the repository
    
@@ -179,3 +192,34 @@ python -m pytest -v
 coverage run -m pytest
 
 coverage report -m
+
+------------------------------------------------------
+Technologies
+
+The project currently uses:
+
+Machine Learning
+-  Python
+-  NumPy
+-  Pandas
+-  Scikit-learn
+-  Joblib
+
+API
+-  FastAPI
+-  Pydantic
+-  Uvicorn
+
+Testing
+-  Pytest
+-  FastAPI TestClient
+-  HTTPX
+-  Coverage.py
+
+Version Control
+-  Git
+-  GitHub
+
+Containerization
+- Docker
+- Docker Compose

@@ -1,0 +1,37 @@
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+
+# Testing cache and coverage
+.pytest_cache/
+**/.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Training files not required for Docker images
+first_project/data/
+first_project/train.py
+
+# Local environments and secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Other unnecessary files
+*.log
+.DS_Store
+Thumbs.db

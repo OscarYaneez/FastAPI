@@ -1,0 +1,22 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    image: credit-risk-api:1.2
+
+    ports:
+      - "8000:8000"
+    
+    restart: unless-stopped
+  
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    
+    image: credit-risk-api-test:1.0
+
+    profiles:
+      - test
